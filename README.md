@@ -58,14 +58,14 @@ Please see the KieServerAdapter.Test project for more detailed examples.
 There a several different options retrieving results from Drools via the KIE server:
 * Insert fact models, have Drools modify the inserted facts, and retrieve the facts by their out-identifier after the rules fire.  That's how the example above works.
 * Insert fact models, have Drools create new facts from the rules, then use the GetObjects command to pull down _all_ of the final facts in Drools memory.
-* Insert fact models, have Drools create new facts from the rules, then use Query command with DRL queries to retrieve specific objects from Drools memory.  This option makes sense if your rules are creating a lot of memory objects.
+* Insert fact models, have Drools create new facts from the rules, then use the Query command with DRL queries to retrieve specific objects from Drools memory.  This option makes sense if your rules are creating a lot of memory objects.
 
 You could be using several of these options at once, even in the same batch command list.  But notice only the last two
 options let you retrieve new facts created by the rules flow (either use GetObjects to get them all or Query commands to get
 one or more specific new facts.)
 
-If you use GetObjects or Query, you should add the DroolsTypeAttribute to your data model classes to make using
-methods like `ObjectsByType<T>` easier to use:
+If you use GetObjects or Query, you should add the `DroolsTypeAttribute` to your data model classes to make using
+methods like `ObjectsOfType<T>` easier to use:
 
 ```csharp
 [DroolsType("com.mycompany.mymodule.AsOfDate")]

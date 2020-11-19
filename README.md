@@ -3,13 +3,13 @@
 KieServerAdapter is a restful client for Drools KieServer. You can easily call rules with your .Net project. 
 These are the covered functions, documented here (https://docs.jboss.org/drools/release/latest/drools-docs/html_single/#runtime-commands-samples-ref_kie-apis).
 
-  - [SetGlobalCommand]
-  - [InsertObjectCommand]
-  - [StartProcessCommand]
-  - [FireAllRulesCommand]
-  - [GetGlobalCommand]
-  - [GetObjectsCommand]
-  - [QueryCommand]
+  - `SetGlobalCommand`
+  - `InsertObjectCommand`
+  - `StartProcessCommand`
+  - `FireAllRulesCommand`
+  - `GetGlobalCommand`
+  - `GetObjectsCommand`
+  - `QueryCommand`
 
 Drools also open source but it is in Java Stack and Kie Server is talented execution server and has restful feautures please see the full documantation in  https://docs.jboss.org/drools/release/latest/drools-docs/html_single/#_kie.ksrestapi
 
@@ -56,16 +56,16 @@ Please see the KieServerAdapter.Test project for more detailed examples.
 
 ### Getting fact data to and from KIE server
 There a several different options retrieving results from Drools via the KIE server:
--- Insert fact models, have Drools modify the inserted facts, and retrieve the facts by their out-identifier after the rules fire.  That's how the example above works.
--- Insert fact models, have Drools create new facts from the rules, then use the GetObjects command to pull down _all_ of the final facts in memory.
--- Insert fact models, have Drools create new facts from the rules, then use Query command with DRL queries to retrieve specific objects from Drools memory.  This option makes sense if your rules are creating a lot of memory objects.
+* Insert fact models, have Drools modify the inserted facts, and retrieve the facts by their out-identifier after the rules fire.  That's how the example above works.
+* Insert fact models, have Drools create new facts from the rules, then use the GetObjects command to pull down _all_ of the final facts in Drools memory.
+* Insert fact models, have Drools create new facts from the rules, then use Query command with DRL queries to retrieve specific objects from Drools memory.  This option makes sense if your rules are creating a lot of memory objects.
 
 You could be using several of these options at once, even in the same batch command list.  But notice only the last two
-options let you retrieve new facts created by the rules flow (either use GetObjects to get them all or Query to get
-specific new facts.)
+options let you retrieve new facts created by the rules flow (either use GetObjects to get them all or Query commands to get
+one or more specific new facts.)
 
 If you use GetObjects or Query, you should add the DroolsTypeAttribute to your data model classes to make using
-methods like ObjectsByType<T> easier to use:
+methods like `ObjectsByType<T>` easier to use:
 
 ```csharp
 [DroolsType("com.mycompany.mymodule.AsOfDate")]
@@ -75,16 +75,16 @@ public class AsOfDate
     public DateTime Date { get; set; }
 }
 
-// later in the code, firing the rules and retrieving all objects
+// ...later in the code, firing the rules and retrieving all objects
 executer.FireAllRules();
 executer.GetObjects();
-var response = await executer.ExecuteAsync("MyDeployment");
+var response = await executer.ExecuteAsync("MyContainer");
 var asOfDates = response.Result.ExecutionResults.ObjectsOfType<AsOfDate>();
 
-// or alternately query for a specific object
+// or alternately query for a specific object type using a Query
 executer.FireAllRules();
 executer.Query("GetAsOfDateInstace", "resultAsOf");
-var response = await executer.ExecuteAsync("MyDeployment");
+var response = await executer.ExecuteAsync("MyContainer");
 var qryResult = response.Result.ExecutionResults.QueryResult("resultAsOf");
 var asOfDates = qryResult.ObjectsOfType<AsOfDate>();
 ```

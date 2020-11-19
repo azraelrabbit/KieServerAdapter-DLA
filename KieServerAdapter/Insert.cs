@@ -7,9 +7,11 @@ namespace KieServerAdapter
         [JsonProperty("insert")]
         public ICommand Command { get; }
 
-        public Insert(object commandObject, string objectNameSpace)
+        public Insert(object commandObject, string objectNameSpace, bool returnObject = true)
         {
-            Command = new CommandInsert { CommandObject = new CommandObject(commandObject, objectNameSpace) };
+            Command = new CommandInsert { 
+                CommandObject = new CommandObject(commandObject, objectNameSpace),
+                ReturnObject = returnObject };
         }
     }
 }

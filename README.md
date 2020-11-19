@@ -1,12 +1,15 @@
 # .Net KieServerAdapter for ![Logo](Files/DroolsLogo210px.png)
 
-KieServerAdapter is a restful client for Drools KieServer. You can easily call rules with your .Net project. These are the covered functions.
+KieServerAdapter is a restful client for Drools KieServer. You can easily call rules with your .Net project. 
+These are the covered functions, documented here (https://docs.jboss.org/drools/release/latest/drools-docs/html_single/#runtime-commands-samples-ref_kie-apis).
 
-  - [SetGlobalCommand](https://docs.jboss.org/drools/release/latest/drools-docs/html_single/#_setglobalcommand)
-  - [InsertObjectCommand](https://docs.jboss.org/drools/release/latest/drools-docs/html_single/#_insertobjectcommand)
-  - [StartProcessCommand](https://docs.jboss.org/drools/release/latest/drools-docs/html_single/#_startprocesscommand)
-  - [FireAllRulesCommand](https://docs.jboss.org/drools/release/latest/drools-docs/html_single/#_fireallrulescommand)
-  - [GetGlobalCommand](https://docs.jboss.org/drools/release/latest/drools-docs/html_single/#_getglobalcommand)
+  - [SetGlobalCommand]
+  - [InsertObjectCommand]
+  - [StartProcessCommand]
+  - [FireAllRulesCommand]
+  - [GetGlobalCommand]
+  - [GetObjectsCommand]
+  - [QueryCommand]
 
 Drools also open source but it is in Java Stack and Kie Server is talented execution server and has restful feautures please see the full documantation in  https://docs.jboss.org/drools/release/latest/drools-docs/html_single/#_kie.ksrestapi
 

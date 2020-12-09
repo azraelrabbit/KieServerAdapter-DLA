@@ -64,7 +64,11 @@ You could be using several of these options at once, even in the same batch comm
 options let you retrieve new facts created by the rules flow (either use GetObjects to get them all or Query commands to get
 one or more specific new facts.)
 
-If you use GetObjects or Query, you should add the `DroolsTypeAttribute` to your data model classes to make using
+A `DroolsTypeAttribute` attribute can be used to identify the Java class name Drools
+will return for a given C# object model.  Use the `InsertType` methods instead of the `Insert` 
+methods to insert objects tagged with this attribute, which also allow you to set an explicit out-identifier to make later retrieval by out-identifier from the results easier.
+
+Particularly if you use GetObjects or Query command, you should definitely add the `DroolsTypeAttribute` to your data model classes and use the `InsertType` methods to make using
 methods like `ObjectsOfType<T>` easier to use:
 
 ```csharp
@@ -81,10 +85,22 @@ executer.GetObjects();
 var response = await executer.ExecuteAsync("MyContainer");
 var asOfDates = response.Result.ExecutionResults.ObjectsOfType<AsOfDate>();
 
-// or alternately query for a specific object type using a Query
+// or alternately query for a specific object type result using a Query
 executer.FireAllRules();
-executer.Query("GetAsOfDateInstace", "resultAsOf");
+executer.Query("GetAsOfDateInstance", "resultAsOf");
 var response = await executer.ExecuteAsync("MyContainer");
 var qryResult = response.Result.ExecutionResults.QueryResult("resultAsOf");
 var asOfDates = qryResult.ObjectsOfType<AsOfDate>();
+```
+
+Simple types can also be inserted and retrieved from results, and arrays created 
+by Drools (usally by creating an ArrayList instance) can be retrieved as well:
+```csharp
+executer.Insert("my favorite string", "java.lang.String", true);
+executer.Insert(4593, "java.lang.Integer", true);
+
+//... and later looking at the response
+var strs = response.Result.ExecutionResults.ObjectsOfType<String>("String");           
+var ints = response.Result.ExecutionResults.ObjectsOfType<int>("Integer");
+var lists = response.Result.ExecutionResults.ObjectsOfType<List<string>>("Array");
 ```

@@ -13,5 +13,17 @@ namespace KieServerAdapter
                 CommandObject = new CommandObject(commandObject, objectNameSpace),
                 ReturnObject = returnObject };
         }
+
+        public Insert(object commandObject, string objectNameSpace, string outIdentifier, bool returnObject = true)
+        {
+            Command = new CommandInsert
+            {
+                CommandObject = new CommandObject(commandObject, objectNameSpace),
+                ReturnObject = returnObject
+            };
+            if (!string.IsNullOrEmpty(outIdentifier))
+                ((CommandInsert)Command).OutIdentifier = outIdentifier;
+        }
+
     }
 }

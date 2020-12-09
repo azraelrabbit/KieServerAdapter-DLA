@@ -54,11 +54,31 @@ namespace KieServerAdapter
             Commands.Add(new Insert(commandObject, objectNameSpace, returnObject));
         }
 
-        public void Insert(object commandObject, bool returnObject = true)
+        public void Insert(object commandObject, string objectNameSpace, string outIdentifier, bool returnObject = true)
+        {
+            Commands.Add(new Insert(commandObject, objectNameSpace, outIdentifier, returnObject));
+        }
+
+        /// <summary>
+        /// insert an object whose type name will come from a DroolsType attribute on the class 
+        /// of the object being inserted
+        /// </summary>
+        public void InsertType(object commandObject, bool returnObject = true)
         {
             var objectNameSpace = commandObject.GetType().GetAttributeValue<DroolsTypeAttribute, string>(a => a.TypeName);
             Insert(commandObject, objectNameSpace, returnObject);
         }
+
+        /// <summary>
+        /// insert an object whose type name will come from a DroolsType attribute on the class 
+        /// of the object being inserted with an explicit out-identifier
+        /// </summary>
+        public void InsertType(object commandObject, string outIdentifier, bool returnObject = true)
+        {
+            var objectNameSpace = commandObject.GetType().GetAttributeValue<DroolsTypeAttribute, string>(a => a.TypeName);
+            Insert(commandObject, objectNameSpace, outIdentifier, returnObject);
+        }
+
 
         public void SetGlobal(string identifier, object commandObject, string objectNameSpace)
         {
@@ -207,4 +227,5 @@ namespace KieServerAdapter
             }
         }
     }
+
 }

@@ -11,5 +11,10 @@ namespace KieServerAdapter
         {
             Command = new CommandGetGlobal { Identifier = identifier };
         }
+
+        public GetGlobal(string identifier,string outIdentifier)
+        {
+            Command = new CommandGetGlobal { Identifier = identifier,OutIdentifier=outIdentifier };
+        }
     }
 }

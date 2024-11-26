@@ -12,4 +12,15 @@ namespace KieServerAdapter
             Command = new CommandFireAllRules { Max = max };
         }
     }
+
+    public class FireAllRulesEmpty : ICommandContainer
+    {
+        [JsonProperty("fire-all-rules")]
+        public ICommand Command { get; }
+
+        public FireAllRulesEmpty(int max=-1)
+        {
+            Command = new CommandFireAllRulesEmpty { Max = max };
+        }
+    }
 }

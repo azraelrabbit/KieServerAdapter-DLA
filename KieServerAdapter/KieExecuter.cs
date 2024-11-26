@@ -7,14 +7,25 @@ using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using RestSharp;
+using RestSharp.Authenticators;
+using RestSharp.Serializers.NewtonsoftJson;
 
 namespace KieServerAdapter
 {
-    public class KieExecuter
+    public class KieExecuter:IDisposable
     {
         protected const string ApplicationType = "application/json";
-        protected const string AutenticationType = "basic";
+        protected const string AutenticationType = "Basic";
         protected const string DefaultInstancesPath = "/services/rest/server/containers/instances/";
+
+        [JsonIgnore]
+        private readonly bool perRequestAuth;
+
+        [JsonIgnore]
+        private RestClient _restClient;
+        [JsonIgnore]
+        private HttpBasicAuthenticator _authenticator;
 
         [JsonIgnore]
         public string HostUrl { get; set; }
@@ -30,6 +41,25 @@ namespace KieServerAdapter
 
         [JsonProperty("lookup")]
         public string LookUp { get; set; } = "defaultKieSession";
+
+
+        public KieExecuter(string hostUrl,string authUserName,string authPassword,bool perRequestAuth=false) { 
+            
+            HostUrl = hostUrl;
+            AuthUserName = authUserName;
+            AuthPassword = authPassword;
+            this.perRequestAuth = perRequestAuth;
+            _authenticator =new HttpBasicAuthenticator(AuthUserName, AuthPassword);
+
+            RestClientOptions options= new RestClientOptions(HostUrl);
+
+            options.Authenticator= _authenticator;
+            
+ 
+            _restClient = new RestClient(options, configureSerialization: s => s.UseNewtonsoftJson());
+
+            
+        }
 
         /// <summary>
         /// Re-sort the commands in the batch by priority as listed in KieCommandTypeEnum.
@@ -91,9 +121,14 @@ namespace KieServerAdapter
             SetGlobal(identifier, commandObject, objectNameSpace);
         }
 
+        public void SetGlobalBase(string identifier, object commandObject)
+        {
+            Commands.Add(new SetGlobalBase(identifier, commandObject));
+        }
+
         public void GetGlobal(string identifier)
         {
-            Commands.Add(new GetGlobal(identifier));
+            Commands.Add(new GetGlobal(identifier,identifier));
         }
 
         public void GetObjects(string outIdentifier = null)
@@ -110,6 +145,12 @@ namespace KieServerAdapter
         {
             Commands.Add(new FireAllRules(max));
         }
+
+        public void FireAllRulesEmpty()
+        {
+            Commands.Add(new FireAllRulesEmpty());
+        }
+
 
         public void Query(string identifier, string outIdentifier = null, IEnumerable<object> arguments = null)
         {
@@ -156,35 +197,72 @@ namespace KieServerAdapter
             var json = JsonConvert.SerializeObject(this);
             var result = new ExecutionResponse<T>();
 
-            using (var client = new HttpClient { BaseAddress = new Uri(HostUrl) })
+
+            var executeUrl = string.Concat(InstancesPath, DefaultInstancesPath, containerName);
+
+
+           //var response= await _restClient.PostJsonAsync(executeUrl, json);
+
+           // _restClient.po
+
+            var request=new RestRequest(executeUrl,Method.Post);
+
+            //request.AddHeader("Content-Type","application/json");
+
+            //add accept header for json
+            request.AddHeader("Accept","application/json");
+
+            if (perRequestAuth)
             {
-
-                client.DefaultRequestHeaders.Clear();
-                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(ApplicationType));
-
-                if (!string.IsNullOrEmpty(AuthUserName))
-                {
-                    var byteArray = Encoding.ASCII.GetBytes($"{AuthUserName}:{AuthPassword}");
-                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(AutenticationType, Convert.ToBase64String(byteArray));
-                }
-
-                using (var request = new HttpRequestMessage(HttpMethod.Post, string.Concat(InstancesPath, DefaultInstancesPath, containerName)))
-                {
-                    request.Content = new StringContent(json);
-                    request.Content.Headers.ContentType = new MediaTypeHeaderValue(ApplicationType);
-
-                    using (var response = await client.SendAsync(request))
-                    {
-                        if (response.IsSuccessStatusCode)
-                        {
-                            result = await response.Content.ReadAsAsync<ExecutionResponse<T>>();
-                            result.ResponseBody = await response.Content.ReadAsStringAsync();
-                        }
-                    }
-                }
+                request.Authenticator=_authenticator;
             }
 
-            result.RequestBody = json;
+            request.AddJsonBody(json);
+
+            var response=await _restClient.ExecuteAsync<ExecutionResponse<T>>(request);
+
+             
+            if (response.IsSuccessStatusCode)
+            {
+                result = response.Data;                
+            }
+
+            if (result != null)
+            {
+                result.ResponseBody = response.Content;
+                result.RequestBody = json;
+            }
+
+             
+            //using (var client = new HttpClient { BaseAddress = new Uri(HostUrl) })
+            //{
+
+            //    client.DefaultRequestHeaders.Clear();
+            //    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(ApplicationType));
+
+            //    if (!string.IsNullOrEmpty(AuthUserName))
+            //    {
+            //        var byteArray = Encoding.ASCII.GetBytes($"{AuthUserName}:{AuthPassword}");
+            //        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(AutenticationType, Convert.ToBase64String(byteArray));
+            //    }
+
+            //    using (var request = new HttpRequestMessage(HttpMethod.Post, string.Concat(InstancesPath, DefaultInstancesPath, containerName)))
+            //    {
+            //        request.Content = new StringContent(json);
+            //        request.Content.Headers.ContentType = new MediaTypeHeaderValue(ApplicationType);
+
+            //        using (var response = await client.SendAsync(request))
+            //        {
+            //            if (response.IsSuccessStatusCode)
+            //            {
+            //                result = await response.Content.ReadAsAsync<ExecutionResponse<T>>();
+            //                result.ResponseBody = await response.Content.ReadAsStringAsync();
+            //            }
+            //        }
+            //    }
+            //}
+
+            //result.RequestBody = json;
 
             return result;
         }
@@ -225,6 +303,11 @@ namespace KieServerAdapter
                     Console.WriteLine(e);
                 }
             }
+        }
+
+        public void Dispose()
+        {
+            _restClient?.Dispose();
         }
     }
 

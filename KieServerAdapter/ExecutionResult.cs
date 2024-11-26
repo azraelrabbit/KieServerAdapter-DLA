@@ -2,6 +2,7 @@
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Linq;
 
 namespace KieServerAdapter
@@ -143,6 +144,19 @@ namespace KieServerAdapter
             return FlatQueryResults.FromJson(qryResult);
         }
 
+        public T GetResult<T>(string outIdentifier)
+        {
+            return JsonConvert.DeserializeObject<T>(this[outIdentifier].ToString());
+        }
 
+        public object GetResultObject(string outIdentifier)
+        {
+            return JsonConvert.DeserializeObject(this[outIdentifier].ToString());
+        }
+
+        public dynamic GetResultDynamic(string outIdentifier)
+        { 
+            return JsonConvert.DeserializeObject<dynamic>(this[outIdentifier].ToString());
+        }
     }
 }

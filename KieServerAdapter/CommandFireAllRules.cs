@@ -13,4 +13,13 @@ namespace KieServerAdapter
         [JsonIgnore]
         public KieCommandTypeEnum CommandType { get; } = KieCommandTypeEnum.FireAllRules;
     }
+
+    public class CommandFireAllRulesEmpty : ICommand
+    {
+        [JsonProperty("max")]
+        public int Max { get; set; } = -1;
+
+        [JsonIgnore]
+        public KieCommandTypeEnum CommandType { get; } = KieCommandTypeEnum.FireAllRules;
+    }
 }
